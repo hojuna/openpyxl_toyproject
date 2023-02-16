@@ -1,14 +1,16 @@
+##pyinstaller managercard_maker_sys.py --noconsole --onefile --add-data "C:\excel_auto\managercard_log.txt;." --add-data "C:\excel_auto\managercard_log2.txt;."
 from openpyxl import load_workbook 
 from openpyxl import Workbook
 from tkinter.messagebox import * 
 import sys
 import os
+from datetime import date , datetime
 
 # 엑셀업무자동화 v0.1 ( 23.02.08 demo )
 
 filename1=""
 filename2=""
-
+day_type=date.today()
 
 def find_sys_MEIPASS(filename):
         # 실행 파일이 생성된 디렉토리 경로를 얻습니다.
@@ -36,6 +38,7 @@ def load_filename():
 
 def crad_make():
     new_ws_last_row=0
+    
     load_filename()
     try:
         wb =load_workbook(filename1)
@@ -53,12 +56,12 @@ def crad_make():
     try:
         for i in range(1,new_ws.max_row):
             if new_ws.cell(i,1).value == None:
-                new_ws_last_row=i
+                basics_new_ws_last_row=i
                 break  
     except:
         showerror("오류","오류가 발생했습니다. \n필터정렬 해지해주세요")        
 
-
+    new_ws_last_row=basics_new_ws_last_row
     for x in range(1,ws.max_row):
         ws_5_value = ws.cell(x,5).value
         ws_4_value = ws.cell(x,4).value
@@ -66,6 +69,8 @@ def crad_make():
         if ws_4_value!=None:
             # 관리카드 입력
             if ws_5_value=='부':
+
+                
                 new_ws["A"+str(new_ws_last_row)]=new_ws_last_row-1
                 new_ws["C"+str(new_ws_last_row)]=ws.cell(x,1).value
                 new_ws["D"+str(new_ws_last_row)]=ws.cell(x,2).value
@@ -74,20 +79,64 @@ def crad_make():
                 new_ws["I"+str(new_ws_last_row)]=ws.cell(x,8).value
                 new_ws["J"+str(new_ws_last_row)]=ws.cell(x,10).value        
                 new_ws["L"+str(new_ws_last_row)]=ws.cell(x,11).value    
-                new_ws["N"+str(new_ws_last_row)]=ws.cell(x,12).value                
+                new_ws["N"+str(new_ws_last_row)]=ws.cell(x,12).value.strftime('%Y-%m-%d')               
                 new_ws["O"+str(new_ws_last_row)]=ws_4_value
                 ws["E"+str(x)]='가'
                 new_ws_last_row+=1
 
-                if "월" in ws_3_value:
-                    new_ws["P"+str(new_ws_last_row)]=ws.cell(x,12).value  
+                # if type(ws_3_value) == day_type:
+                #     new_ws["P"+str(new_ws_last_row)]=ws.cell(x,3).value  
+            
             #완료 사항 입력 
             elif ws_5_value=='완':
                 # 그냥 교체예정파일에 완료사항 열을 만들까>? 아니면 그냥 하던대로 D열에서 쓸까
-                # new_ws["S"+str(new_ws_last_row)]=ws.cell(x,4).value
-                print()
-        # if "월" in ws_3_value and ws_5_value=='가':
-        #     if ws.cell(x,12).value  != None:
+                customerNumber=ws.cell(x,2).value
+                find_bool=False
+                for i in range(1,basics_new_ws_last_row):
+                    if customerNumber==new_ws.cell(i,4).value:
+                        find_bool=True
+                        find_row_number=i
+                if(find_bool):
+                    new_ws["S"+str(find_row_number)]=ws.cell(x,4).value
+                    find_bool=False
+                else:
+                    print("해당 완료처리된 고객번호가 관리카드에 존재하지 않습니다.")
+
+        # if  ws_3_value!=None:
+            
+        #     if type(ws_3_value) == day_type and ws_5_value=='가':
+        #         customerNumber=ws.cell(x,2).value
+        #         column_of_full=True
+        #         for i in range(1,basics_new_ws_last_row):
+        #             if customerNumber==new_ws.cell(i,4).value:
+        #                 find_row_number=i
+
+        #         for i in range(3):
+        #             if new_ws.cell(find_row_number,16+i).value  != None:
+        #                 ##비어 있으면 해당 위치에 값을 넣고 column_of_full = false로 바꾸고 break
+        #                 if(16==16+i):
+        #                     new_ws["P"+find_row_number]=ws_3_value
+        #                     column_of_full = False
+        #                     break
+        #                 elif(17==16+i):
+        #                     new_ws["Q"+find_row_number]=ws_3_value
+        #                     column_of_full = False
+        #                     break
+        #                 elif(18==16+i):
+        #                     new_ws["R"+find_row_number]=ws_3_value
+        #                     column_of_full = False
+        #                     break
+
+                
+        #         if column_of_full:
+        #             ##추진사항이 모두 가득 차있는 상태라면 한열 땡김
+        #             new_ws["P"+find_row_number]=new_ws.cell(find_row_number,17).value
+        #             new_ws["Q"+find_row_number]=new_ws.cell(find_row_number,18).value
+        #             new_ws["R"+find_row_number]=ws_3_value
+
+        #         else:
+        #             column_of_full = True
+            
 
 
 
