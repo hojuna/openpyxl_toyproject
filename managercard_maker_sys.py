@@ -2,11 +2,18 @@
 from openpyxl import load_workbook 
 from openpyxl import Workbook
 from tkinter.messagebox import * 
+from tkinter import messagebox
 import sys
 import os
 from datetime import date , datetime
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
 
-# 엑셀업무자동화 v0.1 ( 23.02.08 demo )
+# 엑셀업무자동화 v0.1 ( 23.02.08 demo )     기본 기능
+# 엑셀업무자동화 v0.2 ( 23.02.16 demo )     완료,추진사항 입력기능 개발 및 경로 수정(실행파일과 로그파일을 이제 제대로 합칠 수 있음)
+
+
+
 
 filename1=""
 filename2=""
@@ -38,7 +45,9 @@ def load_filename():
 
 def crad_make():
     new_ws_last_row=0
-    
+    card_cnt=0
+    completion_cnt=0
+    date_cnt=0
     load_filename()
     try:
         wb =load_workbook(filename1)
@@ -70,7 +79,7 @@ def crad_make():
             # 관리카드 입력
             if ws_5_value=='부':
 
-                
+                card_cnt+=1
                 new_ws["A"+str(new_ws_last_row)]=new_ws_last_row-1
                 new_ws["C"+str(new_ws_last_row)]=ws.cell(x,1).value
                 new_ws["D"+str(new_ws_last_row)]=ws.cell(x,2).value
@@ -92,12 +101,17 @@ def crad_make():
                 # 그냥 교체예정파일에 완료사항 열을 만들까>? 아니면 그냥 하던대로 D열에서 쓸까
                 customerNumber=ws.cell(x,2).value
                 find_bool=False
+                completion_empty=False
                 for i in range(1,basics_new_ws_last_row):
                     if customerNumber==new_ws.cell(i,4).value:
+                        if new_ws.cell(i,19).value != None:
+                            completion_empty=True     
                         find_bool=True
                         find_row_number=i
-                if(find_bool):
-                    new_ws["S"+str(find_row_number)]=ws.cell(x,4).value
+                if find_bool:
+                    if  not completion_empty:
+                        completion_cnt+=1
+                        new_ws["S"+str(find_row_number)]=ws.cell(x,4).value
                     find_bool=False
                 else:
                     print("해당 완료처리된 고객번호가 관리카드에 존재하지 않습니다.")
@@ -145,12 +159,28 @@ def crad_make():
         wb.save(filename =filename1)
     except:
         showerror("오류","오류가 발생했습니다. \n파일을 닫고 실행해주세요")
+
+
+    if completion_cnt !=0:
+        if date_cnt !=0 : 
+            messagebox.showinfo("알림", f"{card_cnt}개의 행이 관리카드로 입력됨 \n{completion_cnt}개의 행의 완료사항이 입력됨 \n{date_cnt}개의 행의 추진사항이 입력됨")
+        else:
+            messagebox.showinfo("알림", f"{card_cnt}개의 행이 관리카드로 입력됨 \n{completion_cnt}개의 행의 완료사항이 입력됨")
+    elif completion_cnt == 0:
+        if date_cnt != 0 :
+            messagebox.showinfo("알림", f"{card_cnt}개의 행이 관리카드로 입력됨 \n{date_cnt}개의 행의 추진사항이 입력됨")
+        elif card_cnt!=0:
+            messagebox.showinfo("알림", f"{card_cnt}개의 행이 관리카드로 입력됨")
+        else:
+            messagebox.showinfo("알림", f"아무것도 입력되지 않음")
+
+        
+    
     new_wb.close()
     wb.close()
 
 
-import tkinter as tk
-from tkinter.filedialog import askopenfilename
+
 
 root = tk.Tk()
 root.title('관리카드 편집기')
